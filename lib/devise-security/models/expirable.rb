@@ -22,10 +22,12 @@ module Devise
 
       # Updates +last_activity_at+, called from a Warden::Manager.after_set_user hook.
       def update_last_activity!
-        if respond_to?(:update_column)
-          self.update_column(:last_activity_at, Time.now.utc)
-        elsif defined? Mongoid
-          self.update_attribute(:last_activity_at, Time.now.utc)
+        ActiveRecord::Base.connected_to(role: :writing) do
+          if respond_to?(:update_column)
+            self.update_column(:last_activity_at, Time.now.utc)
+          elsif defined? Mongoid
+            self.update_attribute(:last_activity_at, Time.now.utc)
+          end
         end
       end
 
